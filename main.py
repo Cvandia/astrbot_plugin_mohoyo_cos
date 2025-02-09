@@ -37,9 +37,11 @@ class MihoyoCos(Star):
         sender_id = event.get_sender_id() if event.message_obj.group_id else None
         count = max(1, min(count, 5))
         message_chain = [
-            At(qq=sender_id),
             Plain(f" 正在搜索{count}张{name}的cos图片"),
         ]
+        if sender_id:
+            message_chain.insert(0, At(qq=sender_id))
+            
         yield event.chain_result(message_chain)
 
         forum_type = ForumType.GenshinCos  # Default forum type
