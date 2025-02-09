@@ -22,6 +22,14 @@ _⭐基于AstrBot获取米游社社区cos照片的插件项目⭐_
 
 </div>
 
+---
+
+## 使用
+
+1. 添加插件到`astrbot/data/plugins`目录下，并重启AstrBot。
+2. 或者使用管理终端添加插件。
+3. 输入`/coshelp`查看更多帮助。
+
 ## 💝 特别鸣谢
 
 - [x] [AstrBot](https://github.com/Soulter/AstrBot): 本项目的基础，非常好用的基于LLM聊天的机器人框架。
