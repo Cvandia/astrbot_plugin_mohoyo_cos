@@ -20,15 +20,15 @@ class MihoyoCos(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
         self.help_str = """
-        米游社社区cos查询插件
-        使用方法：
-        - /hoyocos [角色名] [张数] - 获取指定角色的cos图片
-        - 使用LLM识别角色名和张数
-        - /coshelp - 获取帮助信息
-        例如：
-        - /hoyocos 钟离 1
-        - 来2张钟离的cos图片
-        - /coshelp
+米游社社区cos查询插件
+使用方法：
+- /hoyocos [角色名] [张数] - 获取指定角色的cos图片
+- 使用LLM识别角色名和张数
+- /coshelp - 获取帮助信息
+例如：
+- /hoyocos 钟离 1
+- 来2张钟离的cos图片
+- /coshelp
         """
         self.config = config
         self.timeout = config.get("timeout", 30)
