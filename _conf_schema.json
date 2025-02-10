@@ -1,0 +1,8 @@
+{
+    "timeout": {
+        "description": "请求超时时间",
+        "type": "int",
+        "hint": "如果出现发送失败次数多，可设置请求超时时间",
+        "obvious_hint": true
+    }
+}

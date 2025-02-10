@@ -2,7 +2,8 @@ from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 from astrbot.api.message_components import At, Plain, Image
-from .mihoyo_cos import Search, ForumType, FORUM_TYPE_MAP, Rank
+from .mihoyo_cos import Search, ForumType, FORUM_TYPE_MAP
+from .exception import RequestError
 import re
 import random
 
@@ -14,8 +15,9 @@ import random
     "1.0.0",
     "https://github.com/Cvandia/astrbot_plugin_mohoyo_cos",
 )
+
 class MihoyoCos(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: dict):
         super().__init__(context)
         self.help_str = """
         米游社社区cos查询插件
@@ -28,6 +30,8 @@ class MihoyoCos(Star):
         - 来2张钟离的cos图片
         - /coshelp
         """
+        self.config = config
+        self.timeout = config.get("timeout", 30)
 
     # 注册指令的装饰器。指令名为 helloworld。注册成功后，发送 `/helloworld` 就会触发这个指令，并回复 `你好, {user_name}!`
     @filter.command("hoyocos")
@@ -50,14 +54,23 @@ class MihoyoCos(Star):
                 name = re.sub(key, "", name)
                 forum_type = value
                 break
-        cos = Search(forum_type, name)
-        result = await cos.async_get_urls()
+        cos = Search(forum_type, name, self.timeout)
+        try:
+            result = await cos.async_get_urls()
+        except RequestError as e:
+            logger.error(e)
+            yield event.plain_result("获取cos图片失败，请稍后再试")
+            return
         yield event.plain_result(f"共找到{len(result)}张{name}的cos图片")
         if len(result) == 0:
             return
         random.shuffle(result)
         for i in range(count):
-            yield event.image_result(result[i])
+            try:
+                yield event.image_result(result[i])
+            except Exception as e:
+                logger.error(e)
+                yield event.plain_result("获取cos图片失败，请稍后再试")
 
     @filter.command("coshelp")
     async def help(self, event: AstrMessageEvent):
@@ -82,7 +95,7 @@ class MihoyoCos(Star):
                 name = re.sub(key, "", name)
                 forum_type = value
                 break
-        cos = Search(forum_type, name)
+        cos = Search(forum_type, name, self.timeout)
         result = await cos.async_get_urls()
         count = min(count, len(result))
         await self.context.send_message(
@@ -92,5 +105,9 @@ class MihoyoCos(Star):
             return
         random.shuffle(result)
         for i in range(count):
-            await self.context.send_message(event.unified_msg_origin, Image(result[i]))
+            try:
+                await self.context.send_message(event.unified_msg_origin, Image(result[i]))
+            except Exception as e:
+                logger.error(e)
+                await self.context.send_message(event.unified_msg_origin, Plain("获取cos图片失败，请稍后再试"))
         return "已发送图片，请查收"

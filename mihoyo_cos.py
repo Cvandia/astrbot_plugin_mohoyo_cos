@@ -67,13 +67,14 @@ class Search:
     }
     base_url = "https://bbs-api.mihoyo.com/post/wapi/"
 
-    def __init__(self, forum_id: ForumType, keyword: str) -> None:
+    def __init__(self, forum_id: ForumType, keyword: str, timeout: int = 30) -> None:
         self.api = self.base_url + "searchPosts"
         gametype = get_gids(forum_id.name)
         self.gids = gametype.value
         self.game_name = gametype.name
         self.keyword = keyword
         self.forum_id = forum_id.value
+        self.timeout = timeout
 
     @staticmethod
     def _get_response_name(response: Response, is_good: bool = False) -> list:
@@ -119,14 +120,14 @@ class Search:
 
     async def async_get_urls(self, page_size: int = 10) -> list:
         params = self._get_params(page_size)
-        async with AsyncClient() as client:
-            response = await client.get(self.api, params=params, headers=self.headers)
+        async with AsyncClient(headers=self.headers) as client:
+            response = await client.get(self.api, params=params, timeout=self.timeout)
             return self._get_response_url(response, True)
 
     async def async_get_name(self, page_size: int = 10) -> list:
         params = self._get_params(page_size)
-        async with AsyncClient() as client:
-            response = await client.get(self.api, params=params)
+        async with AsyncClient(headers=self.headers) as client:
+            response = await client.get(self.api, params=params, timeout=self.timeout)
             return self._get_response_name(response, True)
 
 
@@ -136,9 +137,10 @@ class Rank(Search):
     url: https://bbs.mihoyo.com/ys/rankList?forum_id=49
     """
 
-    def __init__(self, forum_id: ForumType) -> None:
+    def __init__(self, forum_id: ForumType, timeout: int = 30) -> None:
         super().__init__(forum_id, "")
         self.api = self.base_url + "getImagePostList"
+        self.timeout = timeout
 
     @overload
     def get_params(self, page_size: int) -> dict:
@@ -152,8 +154,8 @@ class Rank(Search):
     @overload
     async def async_get_url(self, page_size: int = 10) -> list:
         params = self.get_params(page_size)
-        async with AsyncClient() as client:
-            response = await client.get(self.api, params=params, headers=self.headers)
+        async with AsyncClient(headers=self.headers) as client:
+            response = await client.get(self.api, params=params, timeout=self.timeout)
             return self._get_response_url(response, False)
 
 
