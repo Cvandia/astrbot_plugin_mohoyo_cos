@@ -1,11 +1,13 @@
-from astrbot.api.event import filter, AstrMessageEvent
-from astrbot.api.star import Context, Star, register
-from astrbot.api import logger
-from astrbot.api.message_components import At, Plain, Image
-from .mihoyo_cos import Search, ForumType, FORUM_TYPE_MAP
-from .exception import RequestError
-import re
 import random
+import re
+
+from astrbot.api import logger
+from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.message_components import At, Image, Plain
+from astrbot.api.star import Context, Star, register
+
+from .exception import RequestError
+from .mihoyo_cos import FORUM_TYPE_MAP, ForumType, Search
 
 
 @register(
@@ -15,7 +17,6 @@ import random
     "1.0.0",
     "https://github.com/Cvandia/astrbot_plugin_mohoyo_cos",
 )
-
 class MihoyoCos(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
@@ -31,7 +32,9 @@ class MihoyoCos(Star):
 - /coshelp
         """
         self.config = config
-        self.timeout = config.get("timeout", 30)
+        self.timeout = config.get("timeout", 60)
+        if self.timeout == 0:
+            self.timeout = 60
 
     # 注册指令的装饰器。指令名为 helloworld。注册成功后，发送 `/helloworld` 就会触发这个指令，并回复 `你好, {user_name}!`
     @filter.command("hoyocos")
@@ -45,7 +48,7 @@ class MihoyoCos(Star):
         ]
         if sender_id:
             message_chain.insert(0, At(qq=sender_id))
-            
+
         yield event.chain_result(message_chain)
 
         forum_type = ForumType.GenshinCos  # Default forum type
@@ -67,7 +70,10 @@ class MihoyoCos(Star):
         random.shuffle(result)
         for i in range(count):
             try:
-                yield event.image_result(result[i])
+                path = await cos.url2path(result[i])
+                logger.info(f"cos_pic - {path}")
+                yield event.image_result(path)
+                cos.delete_path(path)
             except Exception as e:
                 logger.error(e)
                 yield event.plain_result("获取cos图片失败，请稍后再试")
@@ -88,7 +94,7 @@ class MihoyoCos(Star):
         await self.context.send_message(
             event.unified_msg_origin, Plain(f"正在搜索{count}张{name}的cos图片")
         )
-        
+
         forum_type = ForumType.GenshinCos  # Default forum type
         for key, value in FORUM_TYPE_MAP.items():
             if key in name:
@@ -106,8 +112,13 @@ class MihoyoCos(Star):
         random.shuffle(result)
         for i in range(count):
             try:
-                await self.context.send_message(event.unified_msg_origin, Image(result[i]))
+                path = await cos.url2path(result[i])
+                logger.info(f"cos_pic - {path}")
+                yield event.image_result(path)
+                cos.delete_path(path)
             except Exception as e:
                 logger.error(e)
-                await self.context.send_message(event.unified_msg_origin, Plain("获取cos图片失败，请稍后再试"))
+                await self.context.send_message(
+                    event.unified_msg_origin, Plain("获取cos图片失败，请稍后再试")
+                )
         return "已发送图片，请查收"
