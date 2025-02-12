@@ -114,7 +114,7 @@ class MihoyoCos(Star):
             try:
                 path = await cos.url2path(result[i])
                 logger.info(f"cos_pic - {path}")
-                yield event.image_result(path)
+                await self.context.send_message(event.unified_msg_origin, Image(path))
                 cos.delete_path(path)
             except Exception as e:
                 logger.error(e)
