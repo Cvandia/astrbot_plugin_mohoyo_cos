@@ -1,6 +1,8 @@
 from httpx import AsyncClient, Response
 from enum import Enum, unique
 from typing import overload
+import tempfile as tp
+import os
 
 
 @unique
@@ -129,6 +131,16 @@ class Search:
         async with AsyncClient(headers=self.headers) as client:
             response = await client.get(self.api, params=params, timeout=self.timeout)
             return self._get_response_name(response, True)
+
+    async def url2path(self, url: str) -> str:
+        async with AsyncClient() as client:
+            response = await client.get(url, timeout=self.timeout)
+            with tp.NamedTemporaryFile(delete=False, suffix=".jpg") as f:
+                f.write(response.content)
+            return f.name
+
+    def delete_path(self, path: str) -> None:
+        os.remove(path)
 
 
 class Rank(Search):
