@@ -5,6 +5,7 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.message_components import At, Image, Plain
 from astrbot.api.star import Context, Star, register
+from astrbot.core.message.message_event_result import MessageChain
 
 from .exception import RequestError
 from .mihoyo_cos import FORUM_TYPE_MAP, ForumType, Search
@@ -92,7 +93,8 @@ class MihoyoCos(Star):
         """
         count = max(1, min(count, 5))
         await self.context.send_message(
-            event.unified_msg_origin, Plain(f"正在搜索{count}张{name}的cos图片")
+            event.unified_msg_origin,
+            MessageChain([Plain(f"正在搜索{count}张{name}的cos图片")]),
         )
 
         forum_type = ForumType.GenshinCos  # Default forum type
@@ -105,7 +107,8 @@ class MihoyoCos(Star):
         result = await cos.async_get_urls()
         count = min(count, len(result))
         await self.context.send_message(
-            event.unified_msg_origin, Plain(f"共找到{len(result)}张{name}的cos图片")
+            event.unified_msg_origin,
+            MessageChain([Plain(f"共找到{len(result)}张{name}的cos图片")]),
         )
         if len(result) == 0:
             return
@@ -114,11 +117,14 @@ class MihoyoCos(Star):
             try:
                 path = await cos.url2path(result[i])
                 logger.info(f"cos_pic - {path}")
-                await self.context.send_message(event.unified_msg_origin, Image(path))
+                await self.context.send_message(
+                    event.unified_msg_origin, MessageChain([Image(path)])
+                )
                 cos.delete_path(path)
             except Exception as e:
                 logger.error(e)
                 await self.context.send_message(
-                    event.unified_msg_origin, Plain("获取cos图片失败，请稍后再试")
+                    event.unified_msg_origin,
+                    MessageChain([Plain("获取cos图片失败，请稍后再试")]),
                 )
         return "已发送图片，请查收"
