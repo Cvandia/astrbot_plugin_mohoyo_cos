@@ -54,6 +54,14 @@ def get_gids(forum: str) -> GameType:
     return forum2gids[forum]
 
 
+def has_cos_forum(game: int) -> bool:
+    """
+    根据游戏id区分是否具有cos分区，用于使用不同的搜索策略
+    """
+    has_cos = [GameType.Genshin.value, GameType.DBY.value, GameType.StarRail.value]
+    return game in has_cos
+
+
 class Search:
     """
     搜索帖子
@@ -113,12 +121,15 @@ class Search:
         return [image for post in posts for image in post["post"]["images"]]
 
     def _get_params(self, page_size: int = 10) -> dict:
-        return {
+        params = {
             "gids": self.gids,
             "size": page_size,
-            "keyword": self.keyword,
-            "forum_id": self.forum_id,
+            # 如果没有专属cos区，加上"cos"在总分区进行搜索
+            "keyword": self.keyword if has_cos_forum(self.gids) else self.keyword + 'cos',
         }
+        if has_cos_forum(self.gids):
+            params["forum_id"] = self.forum_id
+        return params
 
     async def async_get_urls(self, page_size: int = 10) -> list:
         params = self._get_params(page_size)
@@ -176,4 +187,12 @@ FORUM_TYPE_MAP = {
     "大别野": ForumType.DBYCOS,
     "星穹铁道": ForumType.StarRailCos,
     "崩铁": ForumType.StarRailCos,
+    "崩坏3": ForumType.Honkai3rdPic,
+    "崩坏三": ForumType.Honkai3rdPic,
+    "崩三": ForumType.Honkai3rdPic,
+    "绝区零": ForumType.ZZZ,
+    "zzz": ForumType.ZZZ,
+    "ZZZ": ForumType.ZZZ,
+    "崩坏2": ForumType.Honkai2Pic,
+    "崩二": ForumType.Honkai2Pic
 }
