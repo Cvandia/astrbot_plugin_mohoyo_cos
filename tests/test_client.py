@@ -161,3 +161,25 @@ async def test_invalid_images(images):
             await client.fetch("原神")
     finally:
         await client.close()
+
+
+@pytest.mark.parametrize(("game", "gids"), [("崩坏3", "1"), ("绝区零", "8"), ("崩坏2", "3")])
+async def test_search_without_cos_forum(game, gids):
+    def respond(request):
+        assert request.url.params["gids"] == gids
+        assert request.url.params["keyword"] == "角色cos"
+        assert "forum_id" not in request.url.params
+        return httpx.Response(200, json={"retcode": 0, "data": {"posts": []}})
+
+    client = HoyoClient(transport=httpx.MockTransport(respond))
+    try:
+        assert await client.fetch(game, "搜索", "角色") == []
+    finally:
+        await client.close()
+
+
+@pytest.mark.parametrize(
+    ("alias", "expected"), [("ZZZ", "绝区零"), ("zzz", "绝区零"), ("崩二", "崩坏2")]
+)
+def test_upstream_aliases(alias, expected):
+    assert game_name(alias) == expected

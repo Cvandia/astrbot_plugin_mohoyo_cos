@@ -26,7 +26,7 @@ HELP = """米游社图片
 /开启每日推送 原神 08:30（群内管理员）
 /关闭每日推送 原神
 /查看本群推送
-游戏：原神、崩坏3、大别野、星穹铁道、绝区零。
+游戏：原神、崩坏3、崩坏2、大别野、星穹铁道、绝区零。
 数量支持 3、x3、X3、*3；含空格的搜索词请加引号。
 精品不支持原神、星穹铁道；上游精品接口可能不可用。
 每日推送仅支持原神、大别野，默认时区 Asia/Shanghai。"""
@@ -172,7 +172,21 @@ class MihoyoCos(Star):
 
     @staticmethod
     def legacy_search(name):
-        for prefix in ("星穹铁道", "崩坏3", "大别野", "绝区零", "原神", "崩铁"):
+        for prefix in (
+            "崩坏学园2",
+            "星穹铁道",
+            "崩坏3",
+            "崩坏三",
+            "崩坏2",
+            "大别野",
+            "绝区零",
+            "原神",
+            "崩铁",
+            "崩三",
+            "崩二",
+            "zzz",
+            "ZZZ",
+        ):
             if name.startswith(prefix):
                 return game_name(prefix), name[len(prefix) :].strip()
         return "原神", name
@@ -190,7 +204,7 @@ class MihoyoCos(Star):
         Args:
             count(number): 图片数量，正整数。
             name(string): 搜索的角色名。
-            game(string): 游戏名，原神、崩坏3、大别野、星穹铁道、绝区零。
+            game(string): 游戏名，原神、崩坏3、崩坏2、大别野、星穹铁道、绝区零。
             kind(string): 搜索、热门、最新、日榜、周榜、月榜或精品。
         """
         if kind not in {"搜索", "热门", "最新", "日榜", "周榜", "月榜", "精品"}:

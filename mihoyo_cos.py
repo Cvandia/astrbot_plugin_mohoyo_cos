@@ -21,9 +21,10 @@ class Game(NamedTuple):
 GAMES = {
     "原神": Game(2, 49, ("OP", "欧泡", "⭕", "🅾️", "🅾️P", "原", "圆")),
     "崩坏3": Game(1, 4, ("崩崩崩", "蹦蹦蹦", "崩坏三", "崩三", "崩崩崩三", "崩坏3rd")),
+    "崩坏2": Game(3, 40, ("崩二", "崩坏学园2")),
     "大别野": Game(5, 47, ("DBY",)),
     "星穹铁道": Game(6, 62, ("星穹", "崩铁", "铁道", "星铁", "穹p", "穹铁")),
-    "绝区零": Game(8, 65, ("绝零区", "绝零", "0", "零", "绝区", "0区")),
+    "绝区零": Game(8, 65, ("绝零区", "绝零", "0", "零", "绝区", "0区", "ZZZ")),
 }
 GAME_ALIASES = {
     alias.casefold(): name for name, game in GAMES.items() for alias in (name, *game.aliases)
@@ -35,7 +36,9 @@ def game_name(value: str) -> str:
     try:
         return GAME_ALIASES[value.casefold()]
     except KeyError:
-        raise ValueError("暂不支持该游戏，请使用原神、崩坏3、大别野、星穹铁道或绝区零") from None
+        raise ValueError(
+            "暂不支持该游戏，请使用原神、崩坏3、崩坏2、大别野、星穹铁道或绝区零"
+        ) from None
 
 
 class Post(NamedTuple):
@@ -73,10 +76,14 @@ class HoyoClient:
             endpoint, key = "searchPosts", "posts"
             params = {
                 "gids": info.gids,
-                "forum_id": info.forum_id,
                 "size": page_size,
                 "keyword": keyword,
             }
+            if game in {"原神", "大别野", "星穹铁道"}:
+                params["forum_id"] = info.forum_id
+            else:
+                # Preserve upstream support for games without a dedicated cos forum.
+                params["keyword"] = keyword + "cos"
         elif kind == "精品":
             if game in {"原神", "星穹铁道"}:
                 raise ValueError(f"{game}暂不支持精品cos")

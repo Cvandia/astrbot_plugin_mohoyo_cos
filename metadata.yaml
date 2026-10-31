@@ -2,7 +2,7 @@ name: astrbot_plugin_mohoyo_cos
 display_name: 米游社 Cos
 short_desc: 米游社多游戏 Cos 图片搜索、榜单查询与每日推送
 desc: >-
-  为 AstrBot 提供原神、崩坏3、星穹铁道、大别野和绝区零的米游社图片查询，
+  为 AstrBot 提供原神、崩坏3、崩坏2、星穹铁道、大别野和绝区零的米游社图片查询，
   支持热门、最新、日周月榜、角色搜索、图片下载与群聊每日推送，
   并提供 LLM 工具调用、请求冷却和可选合并转发。
 help: >-
