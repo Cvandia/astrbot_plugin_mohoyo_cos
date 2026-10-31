@@ -14,7 +14,7 @@ _⭐基于AstrBot获取米游社社区cos照片的插件项目⭐_
 <a href="https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue"></a>
 <a href="https://github.com/AstrBotDevs/AstrBot">
-    <img src="https://img.shields.io/badge/AstrBot-4.29.4+-red"></a>
+    <img src="https://img.shields.io/badge/AstrBot-4.29.1+-red"></a>
 
 **中文简体**
 
@@ -29,7 +29,7 @@ _⭐基于AstrBot获取米游社社区cos照片的插件项目⭐_
 ## 使用
 
 1. 在 AstrBot 插件管理中通过本仓库链接安装；也可以将仓库放入 `astrbot/data/plugins/astrbot_plugin_mohoyo_cos`，安装 `requirements.txt` 后重载插件。
-2. 需要 **Python 3.12+、AstrBot 4.29.4+**，配置在 AstrBot 管理面板中编辑。
+2. 需要 **Python 3.12+、AstrBot 4.29.1+**，配置在 AstrBot 管理面板中编辑。
 3. 输入 `/coshelp` 查看帮助；完整更新记录见 [更新日志](changelog.md)。
 
 ### 指令
@@ -91,13 +91,13 @@ _⭐基于AstrBot获取米游社社区cos照片的插件项目⭐_
 在仓库根目录使用已安装 AstrBot 的 Python 环境：
 
 ```bash
-python -m pip install 'astrbot==4.29.4' -r requirements.txt pytest pytest-asyncio ruff
+python -m pip install 'astrbot==4.29.1' -r requirements.txt pytest pytest-asyncio ruff
 python -m pytest -q
 ruff check .
 ruff format --check .
 ```
 
-测试使用真实 AstrBot SDK，模拟米游社 HTTP 响应及平台发送边界，覆盖接口参数、错误响应、
+兼容性验证覆盖 AstrBot 4.29.1 和 4.29.4。测试使用真实 AstrBot SDK，模拟米游社 HTTP 响应及平台发送边界，覆盖接口参数、错误响应、
 下载中断清理、指令、LLM、冷却、权限、订阅保存和恢复。模拟测试不代表真实平台发送或米游社在线接口可用。
 
 精品接口 `forumGoodPostFullList` 曾在参考项目中返回 404；原神和星穹铁道不支持精品。

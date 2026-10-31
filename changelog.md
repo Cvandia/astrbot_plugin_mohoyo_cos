@@ -2,6 +2,12 @@
 
 按版本倒序记录。版本信息参考 [AstrBot 插件市场](https://cloud.astrbot.app/plugin/Cvandia/astrbot_plugin_mohoyo_cos?tab=changelog)，历史变更根据仓库提交整理；历史日期采用对应版本的仓库提交日期。
 
+## 2.0.2 — 2026-10-31
+
+- 修复 [#8](https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/issues/8)：最低 AstrBot 版本声明由 `>=4.29.4` 调整为 `>=4.29.1`，解决 4.29.1 被加载器拒绝的问题。
+- 同步 README 的最低版本要求、徽章和开发安装示例。
+- 增加真实 AstrBot 加载器版本校验的回归测试，并分别在 4.29.1、4.29.4 SDK 下验证插件功能。
+
 ## 2.0.1 — 2026-10-31
 
 - 恢复 README 原有的居中标题、徽章、鸣谢、贡献者和支持区域排版，保留新版使用与配置说明。
