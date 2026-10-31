@@ -10,7 +10,7 @@ help: >-
   /搜索cos 崩铁 流萤 x2 搜索角色；/hoyocos 钟离 2 兼容旧搜索；
   管理员可使用 /下载cos 原神、/开启每日推送 原神 08:30 和 /关闭每日推送 原神；
   /查看本群推送 查看订阅。
-version: 2.0.0
+version: 2.0.1
 author: Cvandia
 repo: https://github.com/Cvandia/astrbot_plugin_mohoyo_cos
 astrbot_version: ">=4.29.4"

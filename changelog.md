@@ -2,6 +2,11 @@
 
 按版本倒序记录。版本信息参考 [AstrBot 插件市场](https://cloud.astrbot.app/plugin/Cvandia/astrbot_plugin_mohoyo_cos?tab=changelog)，历史变更根据仓库提交整理；历史日期采用对应版本的仓库提交日期。
 
+## 2.0.1 — 2026-10-31
+
+- 恢复 README 原有的居中标题、徽章、鸣谢、贡献者和支持区域排版，保留新版使用与配置说明。
+- 更新 README 的 Python、AstrBot 版本徽章及项目相关链接。
+
 ## 2.0.0 — 2026-10-31
 
 ### 新增

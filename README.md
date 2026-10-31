@@ -1,16 +1,38 @@
-# AstrBot 米游社 Cos
+<div align="center">
+
+# astrbot_plugin_mohoyo_cos
+
+<a href="https://cloud.astrbot.app/plugin/Cvandia/astrbot_plugin_mohoyo_cos">
+<img src="https://count.getloli.com/get/@astrbot_plugin_mohoyo_cos?theme=booru-lewd"></a>
+
+_⭐基于AstrBot获取米游社社区cos照片的插件项目⭐_
+
+<a href="https://www.python.org/downloads/">
+    <img src="https://img.shields.io/badge/python-3.12+-blue"></a>
+<a href="https://qm.qq.com/q/SL6m4KdFe4">
+    <img src="https://img.shields.io/badge/QQ-1141538825-yellow"></a>
+<a href="https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue"></a>
+<a href="https://github.com/AstrBotDevs/AstrBot">
+    <img src="https://img.shields.io/badge/AstrBot-4.29.4+-red"></a>
+
+**中文简体**
+
+</div>
+
+---
 
 基于 AstrBot 的米游社图片插件，支持原神、崩坏3、崩坏2、星穹铁道、大别野和绝区零。
 参考 [nonebot-plugin-genshin-cos](https://github.com/Cvandia/nonebot-plugin-genshin-cos)
 的异步客户端、榜单参数、流式下载和冷却实现，使用 AstrBot 原生消息、LLM 工具、配置和插件生命周期。
 
-## 安装
+## 使用
 
-需要 **Python 3.12+、AstrBot 4.29.4+**。在 AstrBot 插件管理中通过本仓库链接安装，
-或将仓库放入 `data/plugins/astrbot_plugin_mohoyo_cos` 后安装 `requirements.txt` 并重载插件。
-配置在 AstrBot 管理面板中编辑，无需 NoneBot、Alconna 或 OneBot 专用客户端。
+1. 在 AstrBot 插件管理中通过本仓库链接安装；也可以将仓库放入 `astrbot/data/plugins/astrbot_plugin_mohoyo_cos`，安装 `requirements.txt` 后重载插件。
+2. 需要 **Python 3.12+、AstrBot 4.29.4+**，配置在 AstrBot 管理面板中编辑。
+3. 输入 `/coshelp` 查看帮助；完整更新记录见 [更新日志](changelog.md)。
 
-## 指令
+### 指令
 
 | 指令 | 示例 | 权限 |
 | --- | --- | --- |
@@ -40,7 +62,7 @@
 
 启用 LLM 并允许 `get_cos_pic` 工具后，可用自然语言请求图片。工具与指令使用相同的冷却、数量限制及错误处理。
 
-## 配置
+### 配置
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -58,13 +80,13 @@
 最多同时处理 4 个请求流程，下载任务串行执行。HTTP 连接池按需创建，插件卸载时关闭。
 普通查询将图片 URL 交给 AstrBot 适配器发送，不创建随后立即删除的临时图片。
 
-## 从 1.x 升级
+### 从 1.x 升级
 
 保留 `/hoyocos`、`/coshelp` 和 `get_cos_pic` 工具名。旧 `timeout` 在未设置 `cos_timeout` 时作为回退；
 建议在管理面板重新保存新版配置。旧 `Search`、`Rank` 等内部 Python 接口已被 `HoyoClient` 替代。
 本插件不读取 NoneBot 的配置或订阅文件，两个框架的数据目录和会话标识不同。
 
-## 开发验证
+### 开发验证
 
 在仓库根目录使用已安装 AstrBot 的 Python 环境：
 
@@ -82,7 +104,21 @@ ruff format --check .
 网络需要允许 `bbs-api.mihoyo.com` 及实际图片 CDN；图片展示和合并转发能力取决于所用平台。
 图片版权归原作者所有。
 
-## 许可与参考
+## 💝 特别鸣谢
 
-MIT，见 [LICENSE](LICENSE)。参考实现版本 `4455879705e63f716b9b2049442a5a24eb989e83`，
-复用部分的原始许可保留在 [LICENSE.reference](LICENSE.reference)。
+- [x] [AstrBot](https://github.com/AstrBotDevs/AstrBot): 本项目的基础，非常好用的基于LLM聊天的机器人框架。
+- [x] [@qxdn](https://github.com/qxdn):感谢qxdn的[博客文章](https://qianxu.run/2021/11/12/mihoyo-bbs-crawler/)
+
+- [x] [nonebot-plugin-genshin-cos](https://github.com/Cvandia/nonebot-plugin-genshin-cos)：本次重构参考的取图、下载与冷却实现。
+
+### 感谢以下开发者
+
+<a href="https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Cvandia/astrbot_plugin_mohoyo_cos&max=100" alt="contributors" />
+</a>
+
+# 支持
+
+[帮助文档](https://docs.astrbot.app/) · [问题反馈](https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/issues) · [更新日志](changelog.md)
+
+MIT，见 [LICENSE](LICENSE)。参考实现版本 `4455879705e63f716b9b2049442a5a24eb989e83`，复用部分的原始许可保留在 [LICENSE.reference](LICENSE.reference)。
