@@ -1,179 +1,148 @@
-from httpx import AsyncClient, Response
-from enum import Enum, unique
-from typing import overload
-import tempfile as tp
-import os
+# Adapted from Cvandia/nonebot-plugin-genshin-cos (MIT). See LICENSE.reference.
+"""One asynchronous client for all supported Miyoushe image endpoints."""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+from typing import NamedTuple
+from urllib.parse import urlsplit
+
+import anyio
+import httpx
 
 
-@unique
-class GameType(Enum):
-    """
-    游戏类型
-    """
-
-    Genshin = 2  # 原神
-    Honkai3rd = 1  # 崩坏3
-    DBY = 5  # 大别野
-    StarRail = 6  # 星穹铁道
-    Honkai2 = 3  # 崩坏2
-    ZZZ = 8  # 绝区零
+class Game(NamedTuple):
+    gids: int
+    forum_id: int
+    aliases: tuple[str, ...]
 
 
-@unique
-class ForumType(Enum):
-    """
-    论坛类型
-    """
-
-    GenshinCos = 49  # 原神cos
-    GenshinPic = 29  # 原神同人图
-    Honkai3rdPic = 4  # 崩坏3同人图
-    DBYCOS = 47  # 大别野cos
-    DBYPIC = 39  # 大别野同人图
-    StarRailPic = 56  # 星穹铁道同人图
-    StarRailCos = 62  # 星穹铁道cos
-    Honkai2Pic = 40  # 崩坏2同人图
-    ZZZ = 65  # 绝区零
-
-
-def get_gids(forum: str) -> GameType:
-    """
-    根据论坛名获取游戏id
-    """
-    forum2gids = {
-        "GenshinCos": GameType.Genshin,
-        "GenshinPic": GameType.Genshin,
-        "Honkai3rdPic": GameType.Honkai3rd,
-        "DBYCOS": GameType.DBY,
-        "DBYPIC": GameType.DBY,
-        "StarRailPic": GameType.StarRail,
-        "Honkai2Pic": GameType.Honkai2,
-        "StarRailCos": GameType.StarRail,
-        "ZZZ": GameType.ZZZ,
-    }
-    return forum2gids[forum]
-
-
-class Search:
-    """
-    搜索帖子
-    url: https://bbs.mihoyo.com/ys/searchPost?keyword=原神
-    """
-
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.0.0",
-        "Referer": "https://bbs.mihoyo.com/",
-        "origin": "https://bbs.mihoyo.com",
-        "Host": "bbs-api.mihoyo.com",
-        "Connection": "keep-alive",
-    }
-    base_url = "https://bbs-api.mihoyo.com/post/wapi/"
-
-    def __init__(self, forum_id: ForumType, keyword: str, timeout: int = 30) -> None:
-        self.api = self.base_url + "searchPosts"
-        gametype = get_gids(forum_id.name)
-        self.gids = gametype.value
-        self.game_name = gametype.name
-        self.keyword = keyword
-        self.forum_id = forum_id.value
-        self.timeout = timeout
-
-    @staticmethod
-    def _get_response_name(response: Response, is_good: bool = False) -> list:
-        """
-        获取响应的帖子名称
-
-        参数:
-            - response: 响应
-            - is_good: 是否精品
-        返回:
-            - names
-        """
-        if is_good:
-            posts = response.json()["data"]["posts"]
-        else:
-            posts = response.json()["data"]["list"]
-        return [post["post"]["subject"] for post in posts]
-
-    @staticmethod
-    def _get_response_url(response: Response, is_good: bool = False) -> list:
-        """
-        获取响应的帖子url
-
-        参数:
-            - response: 响应
-            - is_good: 是否精品
-        返回:
-            - urls
-        """
-        if is_good:
-            posts = response.json()["data"]["posts"]
-        else:
-            posts = response.json()["data"]["list"]
-        return [image for post in posts for image in post["post"]["images"]]
-
-    def _get_params(self, page_size: int = 10) -> dict:
-        return {
-            "gids": self.gids,
-            "size": page_size,
-            "keyword": self.keyword,
-            "forum_id": self.forum_id,
-        }
-
-    async def async_get_urls(self, page_size: int = 10) -> list:
-        params = self._get_params(page_size)
-        async with AsyncClient(headers=self.headers) as client:
-            response = await client.get(self.api, params=params, timeout=self.timeout)
-            return self._get_response_url(response, True)
-
-    async def async_get_name(self, page_size: int = 10) -> list:
-        params = self._get_params(page_size)
-        async with AsyncClient(headers=self.headers) as client:
-            response = await client.get(self.api, params=params, timeout=self.timeout)
-            return self._get_response_name(response, True)
-
-    async def url2path(self, url: str) -> str:
-        async with AsyncClient() as client:
-            response = await client.get(url, timeout=self.timeout)
-            with tp.NamedTemporaryFile(delete=False, suffix=".jpg") as f:
-                f.write(response.content)
-            return f.name
-
-    def delete_path(self, path: str) -> None:
-        os.remove(path)
-
-
-class Rank(Search):
-    """
-    获取排行榜
-    url: https://bbs.mihoyo.com/ys/rankList?forum_id=49
-    """
-
-    def __init__(self, forum_id: ForumType, timeout: int = 30) -> None:
-        super().__init__(forum_id, "")
-        self.api = self.base_url + "getImagePostList"
-        self.timeout = timeout
-
-    @overload
-    def get_params(self, page_size: int) -> dict:
-        return {
-            "forum_id": self.forum_id,
-            "gids": self.gids,
-            "page_size": page_size,
-            "type": 1,  # 1 日榜 2 周榜 3 月榜
-        }
-
-    @overload
-    async def async_get_url(self, page_size: int = 10) -> list:
-        params = self.get_params(page_size)
-        async with AsyncClient(headers=self.headers) as client:
-            response = await client.get(self.api, params=params, timeout=self.timeout)
-            return self._get_response_url(response, False)
-
-
-FORUM_TYPE_MAP = {
-    "原神": ForumType.GenshinCos,
-    "大别野": ForumType.DBYCOS,
-    "星穹铁道": ForumType.StarRailCos,
-    "崩铁": ForumType.StarRailCos,
+GAMES = {
+    "原神": Game(2, 49, ("OP", "欧泡", "⭕", "🅾️", "🅾️P", "原", "圆")),
+    "崩坏3": Game(1, 4, ("崩崩崩", "蹦蹦蹦", "崩坏三", "崩三", "崩崩崩三", "崩坏3rd")),
+    "大别野": Game(5, 47, ("DBY",)),
+    "星穹铁道": Game(6, 62, ("星穹", "崩铁", "铁道", "星铁", "穹p", "穹铁")),
+    "绝区零": Game(8, 65, ("绝零区", "绝零", "0", "零", "绝区", "0区")),
 }
+GAME_ALIASES = {
+    alias.casefold(): name for name, game in GAMES.items() for alias in (name, *game.aliases)
+}
+RANKS = {"日榜": 1, "周榜": 2, "月榜": 3}
+
+
+def game_name(value: str) -> str:
+    try:
+        return GAME_ALIASES[value.casefold()]
+    except KeyError:
+        raise ValueError("暂不支持该游戏，请使用原神、崩坏3、大别野、星穹铁道或绝区零") from None
+
+
+class Post(NamedTuple):
+    title: str
+    images: tuple[str, ...]
+
+
+class MiyousheError(Exception):
+    """An unsuccessful or malformed Miyoushe response."""
+
+
+class HoyoClient:
+    def __init__(self, timeout: float = 20, transport=None):
+        self.client = httpx.AsyncClient(
+            timeout=timeout,
+            limits=httpx.Limits(max_connections=8, max_keepalive_connections=4),
+            follow_redirects=True,
+            headers={"User-Agent": "Mozilla/5.0", "Referer": "https://bbs.mihoyo.com/"},
+            transport=transport,
+        )
+
+    async def close(self) -> None:
+        await self.client.aclose()
+
+    async def fetch(
+        self, game: str, kind: str = "热门", keyword: str = "", page_size: int = 20
+    ) -> list[Post]:
+        info = GAMES[game]
+        params = {"forum_id": info.forum_id, "page_size": page_size}
+        key = "list"
+        if kind in RANKS:
+            endpoint = "getImagePostList"
+            params.update(gids=info.gids, type=RANKS[kind])
+        elif kind == "搜索":
+            endpoint, key = "searchPosts", "posts"
+            params = {
+                "gids": info.gids,
+                "forum_id": info.forum_id,
+                "size": page_size,
+                "keyword": keyword,
+            }
+        elif kind == "精品":
+            if game in {"原神", "星穹铁道"}:
+                raise ValueError(f"{game}暂不支持精品cos")
+            endpoint, key = "forumGoodPostFullList", "posts"
+            params["gids"] = info.gids
+        elif kind in {"热门", "最新"}:
+            endpoint = "getForumPostList"
+            params.update({"is_hot": True} if kind == "热门" else {"sort_type": 1})
+        else:
+            raise ValueError("不支持的榜单类型")
+        response = await self.client.get(
+            f"https://bbs-api.mihoyo.com/post/wapi/{endpoint}", params=params
+        )
+        response.raise_for_status()
+        try:
+            payload = response.json()
+            if payload.get("retcode", 0) != 0:
+                raise MiyousheError(str(payload.get("message", "接口返回错误")))
+            items = payload["data"][key]
+            if not isinstance(items, list):
+                raise TypeError("post list expected")
+            posts = []
+            for item in items:
+                post = item["post"]
+                images = post["images"]
+                if not isinstance(images, list) or any(
+                    not isinstance(url, str)
+                    or urlsplit(url).scheme not in {"http", "https"}
+                    or not urlsplit(url).netloc
+                    for url in images
+                ):
+                    raise TypeError("invalid image URLs")
+                posts.append(Post(str(post.get("subject", "")), tuple(images)))
+            return posts
+        except (ValueError, KeyError, TypeError, AttributeError) as exc:
+            raise MiyousheError("米游社返回了无效的帖子数据") from exc
+
+    async def download(self, urls: list[str], directory: Path) -> tuple[int, int]:
+        """Download sequentially in 64 KiB chunks; never retain whole images in RAM."""
+        await anyio.Path(directory).mkdir(parents=True, exist_ok=True)
+        success = failed = 0
+        for url in urls:
+            suffix = Path(urlsplit(url).path).suffix.lower()
+            if suffix not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+                suffix = ".jpg"
+            target = directory / (hashlib.sha256(url.encode()).hexdigest() + suffix)
+            temporary = anyio.Path(target.with_suffix(target.suffix + ".part"))
+            try:
+                if await anyio.Path(target).exists():
+                    success += 1
+                    continue
+                async with self.client.stream("GET", url) as response:
+                    response.raise_for_status()
+                    async with await temporary.open("wb") as stream:
+                        async for chunk in response.aiter_bytes(65536):
+                            await stream.write(chunk)
+                await temporary.replace(target)
+                success += 1
+            except (httpx.HTTPError, OSError):
+                failed += 1
+            finally:
+                # Shield cleanup so cancellation cannot leave partial files behind.
+                with anyio.CancelScope(shield=True):
+                    await temporary.unlink(missing_ok=True)
+        return success, failed
+
+
+def image_urls(posts: list[Post]) -> list[str]:
+    return list(dict.fromkeys(url for post in posts for url in post.images))

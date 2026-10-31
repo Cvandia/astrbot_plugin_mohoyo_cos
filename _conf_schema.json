@@ -1,8 +1,48 @@
 {
-    "timeout": {
-        "description": "请求超时时间",
-        "type": "int",
-        "hint": "如果出现发送失败次数多，可设置请求超时时间",
-        "obvious_hint": true
-    }
+  "cos_max": {
+    "description": "每次发送图片上限",
+    "type": "int",
+    "default": 10,
+    "slider": { "min": 1, "max": 100, "step": 1 },
+    "hint": "单次查询或每日推送最多发送的图片数量。用户请求超过上限时自动截断，实际图片不足时按可用数量发送；不限制管理员下载任务。"
+  },
+  "cos_cd": {
+    "description": "用户请求冷却（秒）",
+    "type": "int",
+    "default": 10,
+    "slider": { "min": 0, "max": 300, "step": 1 },
+    "hint": "同一平台实例下，每位用户两次图片查询之间的冷却时间。0 表示关闭；指令和 LLM 工具共用冷却，下载和每日推送不受此项影响。"
+  },
+  "cos_forward_msg": {
+    "description": "使用合并转发发送图片",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后，普通查询使用 AstrBot Nodes 合并转发；需要平台适配器支持。默认关闭并逐张发送，出现发送失败时可关闭此项。每日推送仍使用普通消息。"
+  },
+  "cos_delay": {
+    "description": "逐张发送间隔（秒）",
+    "type": "float",
+    "default": 0.5,
+    "slider": { "min": 0, "max": 10, "step": 0.1 },
+    "hint": "普通查询逐张发送图片时，两张图片之间的等待时间。0 表示不等待；合并转发及每日推送不使用此间隔。"
+  },
+  "cos_timeout": {
+    "description": "HTTP 请求超时（秒）",
+    "type": "float",
+    "default": 20,
+    "slider": { "min": 1, "max": 120, "step": 1 },
+    "hint": "请求米游社接口和下载图片的 HTTP 超时设置，必须大于 0。网络较慢时可适当增大；不控制平台适配器发送图片的超时。"
+  },
+  "cos_path": {
+    "description": "图片下载目录",
+    "type": "string",
+    "default": "",
+    "hint": "管理员执行下载命令时使用的目录。留空使用 data/plugin_data/astrbot_plugin_mohoyo_cos/images；相对路径以 AstrBot 运行目录为基准，也支持绝对路径。图片按游戏分目录保存，修改后不会搬迁已有文件。"
+  },
+  "cos_timezone": {
+    "description": "每日推送时区",
+    "type": "string",
+    "default": "Asia/Shanghai",
+    "hint": "每日推送使用的 IANA 时区名称，例如 Asia/Shanghai（北京时间）、Asia/Tokyo 或 UTC。现有订阅的 HH:MM 按此时区解释，修改后需重载插件。"
+  }
 }

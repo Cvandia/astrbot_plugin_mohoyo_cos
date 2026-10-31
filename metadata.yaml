@@ -1,6 +1,23 @@
-name: astrbot_plugin_mohoyo_cos # 这是你的插件的唯一识别名。
-desc: 获取米游社社区cos插件，支持LLM自识别 # 插件简短描述
-help: 输入 /hoyocos 查看关键词回复帮助。 # 插件的帮助信息
-version: v1.1.2 # 插件版本号。格式：v1.1.1 或者 v1.1
-author: Cvandia # 作者
-repo: https://github.com/Cvandia/astrbot_plugin_mohoyo_cos # 插件的仓库地址
+name: astrbot_plugin_mohoyo_cos
+display_name: 米游社 Cos
+short_desc: 米游社多游戏 Cos 图片搜索、榜单查询与每日推送
+desc: >-
+  为 AstrBot 提供原神、崩坏3、星穹铁道、大别野和绝区零的米游社图片查询，
+  支持热门、最新、日周月榜、角色搜索、图片下载与群聊每日推送，
+  并提供 LLM 工具调用、请求冷却和可选合并转发。
+help: >-
+  /coshelp 查看帮助；/热门cos 原神 x3 获取热门图片；
+  /搜索cos 崩铁 流萤 x2 搜索角色；/hoyocos 钟离 2 兼容旧搜索；
+  管理员可使用 /下载cos 原神、/开启每日推送 原神 08:30 和 /关闭每日推送 原神；
+  /查看本群推送 查看订阅。
+version: 2.0.0
+author: Cvandia
+repo: https://github.com/Cvandia/astrbot_plugin_mohoyo_cos
+astrbot_version: ">=4.29.4"
+social_link: https://github.com/Cvandia
+tags:
+  - 米游社
+  - Cosplay
+  - 图片搜索
+  - 每日推送
+  - AI
