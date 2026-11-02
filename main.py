@@ -197,16 +197,29 @@ class MihoyoCos(Star):
 
     @filter.llm_tool(name="get_cos_pic")
     async def get_cos_pic(
-        self, event: AstrMessageEvent, count: int, name: str, game: str = "原神", kind: str = "搜索"
+        self,
+        event: AstrMessageEvent,
+        count: int = 1,
+        name: str = "",
+        game: str = "原神",
+        kind: str = "",
     ) -> str:
-        """获取米游社角色 cos 图片并发送给用户。
+        """用户想看或索要 cos、cosplay、角色扮演、Coser 图片时，调用此工具直接发送图片。
+
+        支持按角色搜索或获取热门、最新、榜单图片。无需用户提供命令或米游社链接。
+        所有参数均可省略：默认发送 1 张原神热门 cos；有角色名时自动搜索。
+        例如“来张 cos”使用默认参数；“甘雨 cos 来两张”传 name="甘雨", count=2；
+        “崩铁热门 cos”传 game="星穹铁道", kind="热门"。
+        图片由工具直接发送，返回值是执行结果，无需重复发送图片。
 
         Args:
-            count(number): 图片数量，正整数。
-            name(string): 搜索的角色名。
-            game(string): 游戏名，原神、崩坏3、崩坏2、大别野、星穹铁道、绝区零。
-            kind(string): 搜索、热门、最新、日榜、周榜、月榜或精品。
+            count(number): 可省略，默认 1。用户要的图片数量，使用正整数，超过配置上限时自动限制。
+            name(string): 可省略，默认空字符串。角色名或搜索关键词，如甘雨、流萤；看热门或榜单时无需填写。
+            game(string): 可省略，默认原神。支持原神、崩坏3、崩坏2、大别野、星穹铁道、绝区零，也支持崩铁、崩三等别名。
+            kind(string): 可省略，默认空字符串，按 name 自动选择搜索或热门。可选搜索、热门、最新、日榜、周榜、月榜、精品；搜索需提供 name，精品不支持原神和星穹铁道。
         """
+        name = name.strip()
+        kind = kind.strip() or ("搜索" if name else "热门")
         if kind not in {"搜索", "热门", "最新", "日榜", "周榜", "月榜", "精品"}:
             return "不支持的榜单类型"
         return await self.query(event, game, kind, name, count)

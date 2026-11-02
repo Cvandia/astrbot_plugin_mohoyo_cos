@@ -77,6 +77,48 @@ async def test_legacy_and_llm(plugin):
     assert "/热门cos" in (await collect(plugin.help(event)))[0]
 
 
+@pytest.mark.parametrize(
+    ("params", "expected"),
+    [
+        ({}, ("原神", "热门", "")),
+        ({"name": " 甘雨 "}, ("原神", "搜索", "甘雨")),
+        ({"name": "流萤", "game": "崩铁"}, ("星穹铁道", "搜索", "流萤")),
+        ({"name": "  ", "kind": " "}, ("原神", "热门", "")),
+        ({"kind": "周榜", "game": "崩三"}, ("崩坏3", "周榜", "")),
+        ({"name": "甘雨", "kind": "热门"}, ("原神", "热门", "甘雨")),
+    ],
+)
+async def test_llm_optional_parameters(plugin, params, expected):
+    event = Event()
+    assert "已发送1张" in await plugin.get_cos_pic(event, **params)
+    plugin.client.fetch.assert_awaited_once_with(*expected)
+    event.send.assert_awaited_once()
+
+
+@pytest.mark.parametrize(
+    ("params", "error"),
+    [
+        ({"kind": "搜索"}, "请指定搜索内容"),
+        ({"kind": "无效"}, "不支持的榜单类型"),
+        ({"count": 0}, "正整数"),
+        ({"kind": "精品"}, "暂不支持精品cos"),
+    ],
+)
+async def test_llm_invalid_parameters(plugin, params, error):
+    assert error in await plugin.get_cos_pic(Event(), **params)
+    plugin.client.fetch.assert_not_awaited()
+
+
+async def test_registered_llm_tool_defaults(plugin):
+    from astrbot.core.star.register.star_handler import llm_tools
+
+    tool = next(tool for tool in llm_tools.func_list if tool.name == "get_cos_pic")
+    assert set(tool.parameters["properties"]) == {"count", "name", "game", "kind"}
+    assert not tool.parameters.get("required")
+    assert "cosplay" in tool.description
+    assert "已发送1张原神图片" == await tool.handler(plugin, Event())
+
+
 @pytest.mark.parametrize("count", ["0", "-1", "x0", "abc", "1.5"])
 async def test_invalid_counts(plugin, count):
     assert "正整数" in await plugin.query(Event(), "原神", count=count)

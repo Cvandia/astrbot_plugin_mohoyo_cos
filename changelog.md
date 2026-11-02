@@ -2,6 +2,11 @@
 
 按版本倒序记录。版本信息参考 [AstrBot 插件市场](https://cloud.astrbot.app/plugin/Cvandia/astrbot_plugin_mohoyo_cos?tab=changelog)，历史变更根据仓库提交整理；历史日期采用对应版本的仓库提交日期。
 
+## 2.0.3 — 2026-11-02
+
+- 优化 `get_cos_pic` 的 LLM 工具描述，补充自然语言触发场景、参数默认值和调用示例。
+- 数量和角色名改为可省略；默认发送 1 张原神热门 cos，有搜索词时自动搜索，保留原工具名和参数顺序。
+
 ## 2.0.2 — 2026-10-31
 
 - 修复 [#8](https://github.com/Cvandia/astrbot_plugin_mohoyo_cos/issues/8)：最低 AstrBot 版本声明由 `>=4.29.4` 调整为 `>=4.29.1`，解决 4.29.1 被加载器拒绝的问题。
